@@ -1,18 +1,20 @@
 const mongoose = require('mongoose');
+// const uniqueValidator = require('mongoose-uni')
 mongoose.connect('mongodb://localhost/fetcher');
-
+// const db = mongoose.connection();
 let repoSchema = mongoose.Schema({
   // TODO: your schema here!
-  id: Number,
-  login: String,
-  url: String,
-  Repos : {
-    id: Number,
-    fullname: String,
+  id: {type: Number, require: true, index:{unique: true}} ,
+  login: {type: String},
+  handle_url: String,
+  Repos : [{
+    repo_id: {type: Number},
+    repo_name: String,
     created_at: Date,
-    updated_at: Date,
-    forks: Number
-  }
+    updated_at: {type: Date},
+    forks_count: Number,
+    html_url: String
+  }]
 });
 
 let Repo = mongoose.model('Repo', repoSchema);
@@ -23,22 +25,14 @@ let save = (data) => {
   // TODO: Your code here
   // This function should save a repo or repos to
   // the MongoDB
-  if (Array.isArray(data)) {
-    data.forEach(function(document) {
-      saveDocument(document);
-    });
-  } else {//single document
-    saveDocument(data);
-  } 
-}
-//assumption is that data will be sent through by the controller 
-//as an array of objects
-let saveDocument = (data) => {
-  var repo = new Repo(data);
+  console.log("in db,save method ", typeof data.id);
+  var repo = new Repo(data);//very important
   repo.save( (err) => {
     if (err) {
       return handleError(err);
     }
   });
 }
+
+module.exports.Repo = Repo;
 module.exports.save = save;
